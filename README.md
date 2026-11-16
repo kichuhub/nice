@@ -29,4 +29,4 @@ Import this project directory into Vercel, keep the detected Next.js framework p
 - Product catalog and category content live in `data/store.js`.
 - Main storefront and interactions are in `app/page.js`; global tokens are in `app/globals.css` and responsive component styles are in `app/page.module.css`.
 
-Google Fonts are loaded from the Google Fonts stylesheet for Bricolage Grotesque and Figtree.
+Bricolage Grotesque and Figtree are self-hosted at build time with `next/font`, so visitors do not need to request font stylesheets from Google. Production CSS is inlined to remove render-blocking stylesheet requests. GSAP is loaded on demand after the initial page render.

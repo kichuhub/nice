@@ -17,5 +17,11 @@
   "devDependencies": {
     "eslint": "^9",
     "eslint-config-next": "16.4.6"
-  }
+  },
+  "browserslist": [
+    "chrome 111",
+    "edge 111",
+    "firefox 111",
+    "safari 16.4"
+  ]
 }

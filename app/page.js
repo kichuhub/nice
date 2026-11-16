@@ -1,8 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { products, categories, promos, navItems } from "../data/store";
 import styles from "./page.module.css";
 
@@ -10,11 +8,16 @@ function Toast({ message, onDone }) {
   const ref = useRef(null);
   useEffect(() => {
     if (!message) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(ref.current, { y: 18, opacity: 0, scale: 0.96 }, { y: 0, opacity: 1, scale: 1, duration: 0.28, ease: "back.out(1.5)" });
-      gsap.to(ref.current, { opacity: 0, y: 10, delay: 2.6, duration: 0.25, onComplete: onDone });
+    let cancelled = false;
+    let ctx;
+    import("gsap").then(({ default: gsap }) => {
+      if (cancelled) return;
+      ctx = gsap.context(() => {
+        gsap.fromTo(ref.current, { y: 18, opacity: 0, scale: 0.96 }, { y: 0, opacity: 1, scale: 1, duration: 0.28, ease: "back.out(1.5)" });
+        gsap.to(ref.current, { opacity: 0, y: 10, delay: 2.6, duration: 0.25, onComplete: onDone });
+      });
     });
-    return () => ctx.revert();
+    return () => { cancelled = true; ctx?.revert(); };
   }, [message, onDone]);
   return message ? <div ref={ref} className={styles.toast} role="status">{message}</div> : null;
 }
@@ -44,25 +47,35 @@ export default function Home() {
     try { localStorage.setItem("potluck-theme", dark ? "dark" : "light"); } catch { /* ignore */ }
   }, [dark]);
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    const ctx = gsap.context(() => {
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce) return;
-      gsap.from(".entrance", { y: 16, opacity: 0, duration: .65, stagger: .07, ease: "power2.out" });
-      gsap.from(".deal-card", { y: 26, opacity: 0, duration: .55, stagger: .1, delay: .25, ease: "power2.out" });
-      gsap.from(".promo-card", { y: 22, opacity: 0, duration: .5, stagger: .09, delay: .35 });
-      gsap.fromTo(".reward-fill", { width: "0%" }, { width: "62%", duration: 1.2, delay: .6, ease: "power2.out" });
-      gsap.utils.toArray(".reveal").forEach((el) => gsap.from(el, { y: 24, opacity: 0, duration: .6, scrollTrigger: { trigger: el, start: "top 88%" } }));
-    }, reveal);
-    return () => ctx.revert();
+    let cancelled = false;
+    let ctx;
+    Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(([{ default: gsap }, { ScrollTrigger }]) => {
+      if (cancelled) return;
+      gsap.registerPlugin(ScrollTrigger);
+      ctx = gsap.context(() => {
+        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduce) return;
+        gsap.from(".entrance", { y: 16, opacity: 0, duration: .65, stagger: .07, ease: "power2.out" });
+        gsap.from(".deal-card", { y: 26, opacity: 0, duration: .55, stagger: .1, delay: .25, ease: "power2.out" });
+        gsap.from(".promo-card", { y: 22, opacity: 0, duration: .5, stagger: .09, delay: .35 });
+        gsap.fromTo(".reward-fill", { width: "0%" }, { width: "62%", duration: 1.2, delay: .6, ease: "power2.out" });
+        gsap.utils.toArray(".reveal").forEach((el) => gsap.from(el, { y: 24, opacity: 0, duration: .6, scrollTrigger: { trigger: el, start: "top 88%" } }));
+      }, reveal);
+    });
+    return () => { cancelled = true; ctx?.revert(); };
   }, []);
   useEffect(() => {
     if (!loginOpen) return;
-    const ctx = gsap.context(() => gsap.fromTo(modal.current, { opacity: 0, y: 20, scale: .96 }, { opacity: 1, y: 0, scale: 1, duration: .28, ease: "power2.out" }));
+    let cancelled = false;
+    let ctx;
+    import("gsap").then(({ default: gsap }) => {
+      if (cancelled || !modal.current) return;
+      ctx = gsap.context(() => gsap.fromTo(modal.current, { opacity: 0, y: 20, scale: .96 }, { opacity: 1, y: 0, scale: 1, duration: .28, ease: "power2.out" }));
+    });
     const key = (e) => e.key === "Escape" && closeLogin();
     window.addEventListener("keydown", key);
     document.body.style.overflow = "hidden";
-    return () => { ctx.revert(); window.removeEventListener("keydown", key); document.body.style.overflow = ""; };
+    return () => { cancelled = true; ctx?.revert(); window.removeEventListener("keydown", key); document.body.style.overflow = ""; };
   }, [loginOpen]);
 
   const lines = useMemo(() => Object.entries(cart).filter(([, qty]) => qty > 0).map(([id, qty]) => ({ ...products.find((p) => p.id === id), qty })), [cart]);
@@ -77,7 +90,10 @@ export default function Home() {
   const remove = (id) => { setCart((c) => { const next = { ...c }; delete next[id]; return next; }); showToast("Product removed from your bag"); };
   const closeLogin = () => {
     if (modal.current && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      gsap.to(modal.current, { opacity:  0, y: 12, scale: .98, duration: .16, onComplete: () => setLoginOpen(false) });
+      import("gsap").then(({ default: gsap }) => {
+        if (modal.current) gsap.to(modal.current, { opacity: 0, y: 12, scale: .98, duration: .16, onComplete: () => setLoginOpen(false) });
+        else setLoginOpen(false);
+      });
     } else setLoginOpen(false);
   };
   const guest = () => { closeLogin(); showToast("You’re browsing as a guest 👋"); };

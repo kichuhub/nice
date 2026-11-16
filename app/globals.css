@@ -1,12 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700;800&display=swap');
 
 :root { --cream:#fff6e5; --paper:#fffdf7; --ink:#2b1b3d; --orange:#ff5a1f; --yellow:#ffd23f; --mint:#2fd6a5; --lilac:#b79ced; --line:#e8dfcf; --muted:#766b7b; color-scheme:light; }
 :root[data-theme="dark"] { --cream:#211a28; --paper:#302738; --ink:#fff6e5; --line:#51465a; --muted:#c2b6ca; color-scheme:dark; }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
-body { margin:0; background:var(--cream); color:var(--ink); font-family:'Figtree',sans-serif; -webkit-font-smoothing:antialiased; }
+body { margin:0; background:var(--cream); color:var(--ink); font-family:var(--font-figtree),sans-serif; -webkit-font-smoothing:antialiased; }
 button,input { font:inherit; } button,a { -webkit-tap-highlight-color:transparent; } button { color:inherit; }
 ::selection { background:var(--yellow); color:#2b1b3d; }
 @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }
 
 h1,h2,h3,p{margin-top:0}
+
